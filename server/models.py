@@ -2,4 +2,11 @@ from sqlalchemy_serializer import SerializerMixin
 
 from config import db
 
-# Models go here!
+class User():
+    pass
+
+class Character():
+    pass
+
+class Comment():
+    pass
