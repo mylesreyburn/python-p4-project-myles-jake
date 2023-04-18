@@ -4,13 +4,18 @@
 
 # Remote library imports
 from flask import request
+from flask_migrate import Migrate
 from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
+migrate = Migrate(app, db)
 from models import User, Character, Comment
 
 # Views go here!
 
+
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
+
