@@ -15,7 +15,7 @@ def same_as(column_name):
 class User(db.Model, SerializerMixin):
     __tablename__ = "users"
 
-    serialize_only = ("id", "username", "display_name", "password", "profile_image", "characters")
+    serialize_rules = ("-comments.characters", "-comments.user")
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
@@ -72,7 +72,7 @@ class Character(db.Model, SerializerMixin):
 class Comment(db.Model, SerializerMixin):
     __tablename__ = "comments"
 
-    serialize_rules = ("-character", "-user.comments", "-user.characters.comments")
+    serialize_rules = ("-character", "-user.comments", "-user.character.comments")
 
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
