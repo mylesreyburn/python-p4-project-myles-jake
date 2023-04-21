@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import SignIn from './SignIn';
 import Profile from './Profile';
 import Landing from './Landing';
+import Character from './Character'
 
 const darkTheme = createTheme({
   palette: {
@@ -16,24 +17,12 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  const [{ data: characters, error, status }, setCharacters] = useState({
-    data: null,
-    error: null,
-    status: 'pending',
-  });
+  const [characters, setCharacters] = useState([]);
 
   useEffect(() => {
-    fetch('/all_characters').then((r) => {
-      if (r.ok) {
-        r.json().then((data) => {
-          setCharacters({ data: data, error: null, status: 'resolved' });
-        });
-      } else {
-        r.json().then((err) => {
-          setCharacters({ data: null, error: err.error, status: 'rejected' });
-        });
-      }
-    });
+    fetch('/all_characters')
+    .then((r) => r.json())
+    .then(setCharacters)
   }, []);
 
   return (
@@ -42,14 +31,11 @@ function App() {
         <CssBaseline />
         <Navbar />
         <Switch>
-          <Route exact path="/characters">
-            {status === 'pending' && <div>Loading...</div>}
-            {status === 'rejected' && <div>Error: {error}</div>}
-            {status === 'resolved' && (
+          <Route path="/characters">
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gridTemplateColumns: 'repeat(4, 5fr)',
                   gap: '10px',
                 }}
               >
@@ -57,7 +43,9 @@ function App() {
                   <Card character={character} key={character.id} />
                 ))}
               </div>
-            )}
+          </Route>
+          <Route path="/character/:id">
+                  <Character></Character>
           </Route>
           <Route exact path ="/login">
             <SignIn></SignIn>

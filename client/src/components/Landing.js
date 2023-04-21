@@ -5,11 +5,13 @@ function Landing(){
     return (
         <Box>
             <Typography component="h1" variant="h3" align="center" sx={{
-                align: 'center'
+                mt: 25
             }}>
                 Welcome to WebsiteName!!
             </Typography>
-
+            <Typography component="h1" variant="h5" align="center">
+                Website Info!
+            </Typography>
         </Box>
 
     )
