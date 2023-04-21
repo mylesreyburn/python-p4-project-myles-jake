@@ -7,11 +7,12 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import CardMedia from '@mui/material/CardMedia';
 import { useState, useEffect } from 'react';
+import { Link } from "react-router-dom";
 
 export default function OutlinedCard({ character }) {
   return (
     <Box sx={{ minWidth: 275 }}>
-      <Card variant="outlined">
+      <Card variant="outlined" sx={{minHeight: 440}}>
         <CardContent>
           <CardMedia
             component="img"
@@ -32,7 +33,7 @@ export default function OutlinedCard({ character }) {
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small">View Character Page</Button>
+          <Link size="small" to={`/character/${character.id}`}>View Character Page</Link>
         </CardActions>
       </Card>
     </Box>

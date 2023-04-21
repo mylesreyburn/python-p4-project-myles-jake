@@ -18,7 +18,7 @@ function Profile() {
         }}
             sizes="lg"
             alt="Remy Sharp"
-            src="https://cdn.discordapp.com/avatars/1040152162736541736/1fcc07e35902662bf91a68fdbed29dcd.png?size=4096"
+            src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png"
         />
         <Typography component="h1" variant="h5" sx={{
             ml:13,

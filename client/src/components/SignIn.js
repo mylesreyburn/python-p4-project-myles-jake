@@ -8,6 +8,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useHistory } from "react-router-dom";
 
 const darkTheme = createTheme({
     palette: {
@@ -15,14 +16,17 @@ const darkTheme = createTheme({
     },
   });
 
-export default function SignIn() {
+export default function SignIn({ logIn }) {
+  const history = useHistory();
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
+    const enteredUser = {
       email: data.get('email'),
       password: data.get('password'),
-    });
+    }
+    logIn(enteredUser)
+    history.push('/characters');
   };
 
   return (
@@ -53,9 +57,9 @@ export default function SignIn() {
               required
               fullWidth
               id="email"
-              label="Email Address"
-              name="email"
-              autoComplete="email"
+              label="Username"
+              name="username"
+              autoComplete="username"
               autoFocus
             />
             <TextField

@@ -38,7 +38,7 @@ if __name__ == '__main__':
         for i in range(10):
             name = fake.name()
             password = "teluge"
-            user = User(username=name, password=password, profile_image=rc(profile_pics))
+            user = User(username=name, password_hash=password, profile_image=rc(profile_pics))
             users.append(user)
         
         db.session.add_all(users)

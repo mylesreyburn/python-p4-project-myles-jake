@@ -161,11 +161,8 @@ def user_by_id(id):
     )
     return response
 
-@app.route("/character/<int:id>", methods=["GET", "PATCH", "DELETE"])
+@app.route("/character/<int:id>", methods=["GET", "POST", "PATCH"])
 def character_by_id(id):
-
-    # GETTING CHARACTER (REQUIRED FOR ALL METHODS)
-
     character = Character.query.filter(Character.id == id).first()
 
     if not character:
@@ -177,52 +174,13 @@ def character_by_id(id):
         )
         return response
     
-    # PATCH FUNCTIONALITY
     
-    if request.method == "PATCH":
-        for field in request.json:
-            print(f"{field}: {request.json.get(field)}")
-            if field != None:
-                try:
-                    setattr(character, field, request.json.get(field))
-                except:
-                    error = {
-                        "error": "Error During Character Editing: Likely Invalid Data Type"
-                    }
-                    response = make_response(
-                        jsonify(error), 
-                        400
-                    )
-                    return response
-        
-        db.session.commit()
 
-        response = make_response(
-            jsonify(character.to_dict()),
-            200
-        )
-
-        return response
-            
-    # DELETE FUNCTIONALITY
-
-    elif request.method == "DELETE":
-        db.session.delete(character)
-        db.session.commit()
-        response = make_response(
-            jsonify({"success": "Character Deleted Successfully"})
-        )
-
-        return response
-    
-    # GET FUNCTIONALITY
-
-    elif request.method == "GET":
-        response = make_response(
-            jsonify(character.to_dict()),
-            200
-        )
-        return response
+    response = make_response(
+        jsonify(character.to_dict()),
+        200
+    )
+    return response
 
 @app.route("/comment/<int:id>")
 def comment_by_id(id):
@@ -243,36 +201,7 @@ def comment_by_id(id):
     )
     return response
 
-@app.route("/comment/new", methods=["POST"])
-def new_comment():
-    if request.method == "POST":
 
-        comment_body = request.json.get("contents")
-        current_user_id = session["user_token"]
-        current_user = User.query.filter(User.id == current_user_id).first()
-        if not current_user:
-            response = make_response(
-                jsonify({
-                    "error": "401: User Not Signed In"
-                }),
-                401
-            )
-
-            return response
-        
-        if len(comment_body) > 0: # this way you can't submit blank comments
-            new_comment = Comment(user=current_user, contents=comment_body)
-            db.session.add(new_comment)
-            db.session.commit()
-
-        else:
-            response = make_response(
-                jsonify({
-                    "error": "400: Comment Must Contain At Least One Character"
-                }),
-                400
-            )
-            return response
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
