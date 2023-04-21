@@ -30,9 +30,9 @@ def log_in():
     username = log_in_data.get("username")
     password = log_in_data.get("password") # still need to implement password hashing and such
 
-    user = User.query.filter(User.password == password, User.username == username).first()
+    user = User.query.filter(User.username == username).first()
 
-    if not user:
+    if not user or not user.authenticate(password):
         response = make_response(
             jsonify({"error": "Invalid Username or Password"}),
             404
@@ -65,7 +65,7 @@ def sign_up():
     password = new_user_data.get("password")
     profile_image = new_user_data.get("profile_image")
 
-    new_user_object = User(username=username, password=password, profile_image=profile_image)
+    new_user_object = User(username=username, password_hash=password, profile_image=profile_image)
 
     if not new_user_object:
         response = make_response(
@@ -170,8 +170,10 @@ def user_by_id(id):
                         403)
                     
                     return response
+                if field == "display_name":
+                    print(f"Woah, the display_name field is: {field}")
                 
-                if field == "display_name" and len(field) < 1:
+                if field == "display_name" and len(request.json.get(field)) < 1:
                     response = make_response(
                         jsonify({
                             "error": "400: Display Name Must Contain At Least One Character"
@@ -217,19 +219,17 @@ def character_by_id(id):
     
     if request.method == "PATCH":
         for field in request.json:
-            print(f"{field}: {request.json.get(field)}")
-            if field != None:
-                try:
-                    setattr(character, field, request.json.get(field))
-                except:
-                    error = {
-                        "error": "Error During Character Editing: Likely Invalid Data Type"
-                    }
-                    response = make_response(
-                        jsonify(error), 
-                        400
-                    )
-                    return response
+            try:
+                setattr(character, field, request.json.get(field))
+            except:
+                error = {
+                    "error": "Error During Character Editing: Likely Invalid Data Type"
+                }
+                response = make_response(
+                    jsonify(error), 
+                    400
+                )
+                return response
         
         db.session.commit()
 
