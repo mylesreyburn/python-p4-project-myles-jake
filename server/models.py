@@ -58,7 +58,7 @@ class Character(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
 
     name = db.Column(db.String)
-    age = db.Column(db.Integer)
+    age = db.Column(db.String)
     race = db.Column(db.String)
     gender = db.Column(db.String)
     bio_1 = db.Column(db.String)
