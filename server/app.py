@@ -42,6 +42,8 @@ def log_in():
 
     session["user_token"] = user.id
 
+    print(session.get("user_token"))
+
     response = make_response(
         jsonify({"success": "User Logged In Successfully"}),
         200
@@ -142,8 +144,10 @@ def all_comments():
 
     return response
 
-@app.route("/user/<int:id>")
+@app.route("/user/<int:id>", methods=["GET", "PATCH"])
 def user_by_id(id):
+    print(session.get("user_token"))
+
     user = User.query.filter(User.id == id).first()
 
     if not user:
@@ -154,6 +158,38 @@ def user_by_id(id):
             404
         )
         return response
+    
+    if request.method == "PATCH":
+        if session.get("user_token") == user.id:
+            for field in request.json:
+                if field == "password" or field == "username":
+                    response = make_response(
+                        jsonify({
+                            "error": "403: Cannot Modify User Credentials"
+                        }),
+                        403)
+                    
+                    return response
+                
+                if field == "display_name" and len(field) < 1:
+                    response = make_response(
+                        jsonify({
+                            "error": "400: Display Name Must Contain At Least One Character"
+                        }),
+                        400
+                    )
+                    return response
+                setattr(user, field, request.json.get(field))
+            db.session.commit()
+        else:
+            response = make_response(
+            jsonify({
+                    "error": "403: Cannot Modify Another User's Data"
+                }),
+                403
+            )
+            return response
+
 
     response = make_response(
         jsonify(user.to_dict()),
@@ -270,6 +306,16 @@ def new_comment(id):
                     "error": "401: User Not Signed In"
                 }),
                 401
+            )
+
+            return response
+        
+        elif not current_character:
+            response = make_response(
+                jsonify({
+                    "error": "400: Comment Must Be Attached To A Character"
+                }),
+                400
             )
 
             return response
