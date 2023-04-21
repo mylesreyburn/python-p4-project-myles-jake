@@ -13,15 +13,43 @@ from config import app, db, api
 
 from models import User, Character, Comment
 
+# setting up secret key
+
+app.secret_key = b'\xfd\x94(\x8b\xda\xe1\xee\xdc5\xcb\x88\x0b&\xb4\xc7\xa3'
+
 # Views go here!
 
-@app.route("/log_in")
+@app.route("/log_in", methods=["GET"])
 def log_in():
     # simple code: This takes in data from a Formik form, that being a username and a password.
     # it then checks the database to see if there's a user with both that username and that password.
     # if there's a match, it logs the user in and assigns their session a cookie which says which user they're logged in as
     # if there isn't a match, it doesn't do this
-    pass
+
+    log_in_data = request.get_json()
+    username = log_in_data.get("username")
+    password = log_in_data.get("password") # still need to implement password hashing and such
+
+    user = User.query.filter(User.username == username and User.password == password).first()
+
+    if not user:
+        response = make_response(
+            jsonify({"error": "Invalid Username or Password"}),
+            404
+        )
+
+        return response
+
+    session["user_token"] = user.id
+
+    response = make_response(
+        jsonify({"success": "User Logged In Successfully"}),
+        200
+    )
+
+    return response
+
+
 
 @app.route("/sign_up", methods = ["POST"])
 def sign_up():
@@ -30,8 +58,41 @@ def sign_up():
     # creates a brand new User object if the username is not already in use
     # slaps a user cookie on the session and everything's hunky dory
 
+    new_user_data = request.get_json()
+    username = new_user_data.get("username")
+    password = new_user_data.get("password")
+    profile_image = new_user_data.get("profile_image")
 
-    pass
+    new_user_object = User(username=username, password=password, profile_image=profile_image)
+
+    if not new_user_object:
+        response = make_response(
+            jsonify({"error": "Invalid User"}),
+            400
+        )
+
+        return response
+    try:
+        db.session.add(new_user_object)
+        db.session.commit()
+    except:
+        response = make_response(
+            jsonify({"error": "Username Already In Use"}),
+            400
+        )
+        return response
+
+    session["user_token"] = new_user_object.id
+
+    print(session["user_token"])
+
+    response = make_response(
+        jsonify({"success": "New User Created Successfully"}),
+        201
+    )
+
+    return response
+
 
 @app.route("/all_characters")
 def all_characters():
@@ -100,7 +161,7 @@ def user_by_id(id):
     )
     return response
 
-@app.route("/character/<int:id>")
+@app.route("/character/<int:id>", methods=["GET", "POST", "PATCH"])
 def character_by_id(id):
     character = Character.query.filter(Character.id == id).first()
 
@@ -112,6 +173,8 @@ def character_by_id(id):
             404
         )
         return response
+    
+    
 
     response = make_response(
         jsonify(character.to_dict()),
