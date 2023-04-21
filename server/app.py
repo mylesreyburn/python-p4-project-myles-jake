@@ -19,7 +19,7 @@ app.secret_key = b'\xfd\x94(\x8b\xda\xe1\xee\xdc5\xcb\x88\x0b&\xb4\xc7\xa3'
 
 # Views go here!
 
-@app.route("/log_in", methods=["GET"])
+@app.route("/log_in", methods=["POST"])
 def log_in():
     # simple code: This takes in data from a Formik form, that being a username and a password.
     # it then checks the database to see if there's a user with both that username and that password.
