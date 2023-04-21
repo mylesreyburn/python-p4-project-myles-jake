@@ -30,7 +30,7 @@ def log_in():
     username = log_in_data.get("username")
     password = log_in_data.get("password") # still need to implement password hashing and such
 
-    user = User.query.filter(User.username == username and User.password == password).first()
+    user = User.query.filter(User.password == password, User.username == username).first()
 
     if not user:
         response = make_response(
@@ -207,6 +207,8 @@ def character_by_id(id):
     # DELETE FUNCTIONALITY
 
     elif request.method == "DELETE":
+        for comment in character.comments:
+            db.session.delete(comment)
         db.session.delete(character)
         db.session.commit()
         response = make_response(
@@ -224,7 +226,7 @@ def character_by_id(id):
         )
         return response
 
-@app.route("/comment/<int:id>")
+@app.route("/comment/<int:id>", methods=["GET", "DELETE"])
 def comment_by_id(id):
     comment = Comment.query.filter(Comment.id == id).first()
 
@@ -237,19 +239,31 @@ def comment_by_id(id):
         )
         return response
 
-    response = make_response(
-        jsonify(comment.to_dict()),
-        200
-    )
-    return response
+    if request.method == "GET":
+        response = make_response(
+            jsonify(comment.to_dict()),
+            200
+        )
+        return response
+    
+    elif request.method == "DELETE":
+        db.session.delete(comment)
+        db.session.commit()
 
-@app.route("/comment/new", methods=["POST"])
-def new_comment():
+        response = make_response(
+            jsonify({"success": "Comment Deleted Successfully"})
+        )
+
+        return response
+
+@app.route("/character/<int:id>/new_comment", methods=["POST"])
+def new_comment(id):
     if request.method == "POST":
 
         comment_body = request.json.get("contents")
         current_user_id = session["user_token"]
         current_user = User.query.filter(User.id == current_user_id).first()
+        current_character = Character.query.filter(Character.id == id).first()
         if not current_user:
             response = make_response(
                 jsonify({
@@ -261,9 +275,16 @@ def new_comment():
             return response
         
         if len(comment_body) > 0: # this way you can't submit blank comments
-            new_comment = Comment(user=current_user, contents=comment_body)
+            new_comment = Comment(user=current_user, character=current_character, contents=comment_body)
             db.session.add(new_comment)
             db.session.commit()
+
+            response = make_response(
+                jsonify(new_comment.to_dict()),
+                201
+            )
+
+            return response
 
         else:
             response = make_response(
@@ -273,6 +294,53 @@ def new_comment():
                 400
             )
             return response
+        
+@app.route("/character/new", methods=["POST"])
+def new_character():
+    if request.method == "POST":
+        data = request.json
+        current_user_id = session["user_token"]
+        current_user = User.query.filter(User.id == current_user_id).first()
+
+        name = data.get("name")
+        age = data.get("age")
+        race = data.get("race")
+        gender = data.get("gender")
+        bio_1 = data.get("bio_1")
+        bio_2 = data.get("bio_2")
+        image_1 = data.get("image_1")
+        image_2 = data.get("image_2")
+
+        new_character = Character(
+            user=current_user,
+            name=name,
+            age=age,
+            race=race,
+            gender=gender,
+            bio_1=bio_1,
+            bio_2=bio_2,
+            image_1=image_1,
+            image_2=image_2
+        )
+
+        if not new_character:
+            response = make_response(
+                jsonify({
+                    "error": "Error During Character Creation"
+                }),
+                400
+            )
+            return response
+
+        db.session.add(new_character)
+        db.session.commit()
+
+        response = make_response(
+            jsonify(new_character.to_dict()),
+            201
+        )
+
+        return response
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
