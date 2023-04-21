@@ -213,7 +213,6 @@ def character_by_id(id):
         return response
     
     
-<<<<<<< HEAD
     if request.method == "PATCH":
         for field in request.json:
             try:
@@ -258,14 +257,6 @@ def character_by_id(id):
             200
         )
         return response
-=======
-
-    response = make_response(
-        jsonify(character.to_dict()),
-        200
-    )
-    return response
->>>>>>> origin/main
 
 @app.route("/comment/<int:id>", methods=["GET", "DELETE"])
 def comment_by_id(id):
@@ -291,7 +282,6 @@ def comment_by_id(id):
         db.session.delete(comment)
         db.session.commit()
 
-<<<<<<< HEAD
         response = make_response(
             jsonify({"success": "Comment Deleted Successfully"})
         )
@@ -393,9 +383,6 @@ def new_character():
         )
 
         return response
-=======
-
->>>>>>> origin/main
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
