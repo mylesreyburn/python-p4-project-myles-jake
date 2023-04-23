@@ -22,9 +22,12 @@ export default function Create() {
       age: data.get('name'),
       race: data.get('race'),
       gender: data.get('gender'),
-      bio: data.get('bio'),
+      image_1: data.get('image1'),
+      image_2: data.get('image2'),
+      bio_1: data.get('bio'),
+      bio_2: data.get('bio2'),
     };
-    fetch("/character/", {
+    fetch("/characters", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,6 +97,26 @@ export default function Create() {
                   id="gender"
                 />
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  name="image1"
+                  label="Image 1"
+                  type="image1"
+                  id="image1"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  required
+                  fullWidth
+                  name="image2"
+                  label="Image 2"
+                  type="image2"
+                  id="image2"
+                />
+              </Grid>
               <Grid item xs={200}>
                 <TextField
                   required
@@ -102,6 +125,16 @@ export default function Create() {
                   label="Bio"
                   type="bio"
                   id="bio"
+                />
+              </Grid>
+              <Grid item xs={200}>
+                <TextField
+                  required
+                  fullWidth
+                  name="bio2"
+                  label="Bio 2"
+                  type="bio2"
+                  id="bio2"
                 />
               </Grid>
             </Grid>

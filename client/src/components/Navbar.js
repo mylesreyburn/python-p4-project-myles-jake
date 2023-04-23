@@ -6,7 +6,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { useHistory } from "react-router-dom";
 
-export default function ButtonAppBar({isLoggedIn}) {
+export default function ButtonAppBar({ user }) {
   const history = useHistory();
 
   function handleChar() {
@@ -29,8 +29,6 @@ export default function ButtonAppBar({isLoggedIn}) {
     history.push('/create');
   }
 
-  const text = isLoggedIn ? "Login" : "Logout";
-
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -38,6 +36,9 @@ export default function ButtonAppBar({isLoggedIn}) {
         <Toolbar>
           <Typography variant="h6" component="div" sx={{m:1}}>
             Character Database
+          </Typography>
+          <Typography variant="h6" component="div" sx={{m:1}}>
+            |
           </Typography>
           <Box sx={{ flexGrow: 1, l: 5, display: { xs: 'none', md: 'flex' } }}>
               <Button onClick={handleHome}
@@ -56,7 +57,7 @@ export default function ButtonAppBar({isLoggedIn}) {
                 Create
               </Button>
           </Box>
-          <Button color="inherit" onClick={handleLogin}>{text}</Button>
+          {user ? <Button color="inherit">logout</Button> : <Button color="inherit" onClick={handleLogin}>login</Button>}
         </Toolbar>
       </AppBar>
     </Box>

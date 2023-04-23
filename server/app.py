@@ -19,128 +19,153 @@ app.secret_key = b'\xfd\x94(\x8b\xda\xe1\xee\xdc5\xcb\x88\x0b&\xb4\xc7\xa3'
 
 # Views go here!
 
-@app.route("/log_in", methods=["GET"])
-def log_in():
-    # simple code: This takes in data from a Formik form, that being a username and a password.
-    # it then checks the database to see if there's a user with both that username and that password.
-    # if there's a match, it logs the user in and assigns their session a cookie which says which user they're logged in as
-    # if there isn't a match, it doesn't do this
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
 
-    log_in_data = request.get_json()
-    username = log_in_data.get("username")
-    password = log_in_data.get("password") # still need to implement password hashing and such
+        check_user = User.query.filter(User.username == data['username']).first()
+        
+        if check_user and check_user.authenticate(data['password']):
+            session['user_id'] = check_user.id
+            return make_response(check_user.to_dict(), 200)
+        return {'error': 'Unauthorized'}, 401
 
-    user = User.query.filter(User.username == username and User.password == password).first()
+class Logout(Resource):
+    def delete(self):
+        if session.get('user_id'):
+            session['user_id'] = None
+            return {}, 204
+        return {'error': '401 Unauthorized'}, 401
 
-    if not user:
+class Signup(Resource):
+    def post(self):
+        data = request.get_json()
+        username = data.get('username')
+        password = data.get('password')
+        avatar = data.get('avatar')
+
+        new_user = User(
+            username=username
+        )
+
+        new_user.password_hash = password
+        avatar = avatar
+
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            session['user_id'] = new_user.id
+            return make_response(new_user.to_dict(), 201)
+
+        except Exception as e:
+            print(e)
+            return make_response({'error': 'Unprocessable Entity'}, 417)
+
+
+class Characters(Resource):
+    def get(self):
+        all_chars = []
+
+        for character in Character.query.all():
+            dict_char = character.to_dict()
+            all_chars.append(dict_char)
+
         response = make_response(
-            jsonify({"error": "Invalid Username or Password"}),
-            404
+            jsonify(all_chars),
+            200
         )
 
         return response
-
-    session["user_token"] = user.id
-
-    response = make_response(
-        jsonify({"success": "User Logged In Successfully"}),
-        200
-    )
-
-    return response
+    
+    def post(self):
 
 
+        data = request.get_json()
+        name = data.get('name')
+        age = data.get('age')
+        race = data.get('race')
+        gender = data.get('gender')
+        bio_1 = data.get('bio1')
+        bio_2 = data.get('bio2')
+        image_1 = data.get('image1')
+        image_2 = data.get('image2')
 
-@app.route("/sign_up", methods = ["POST"])
-def sign_up():
-    # even simpler code:
-    # takes in a form with a username and a password
-    # creates a brand new User object if the username is not already in use
-    # slaps a user cookie on the session and everything's hunky dory
-
-    new_user_data = request.get_json()
-    username = new_user_data.get("username")
-    password = new_user_data.get("password")
-    profile_image = new_user_data.get("profile_image")
-
-    new_user_object = User(username=username, password=password, profile_image=profile_image)
-
-    if not new_user_object:
-        response = make_response(
-            jsonify({"error": "Invalid User"}),
-            400
+        new_character = Character(
+            name=name
         )
 
-        return response
-    try:
-        db.session.add(new_user_object)
+        age = age 
+        race = race
+        gender = gender
+        bio_1 = bio_1
+        bio_2 = bio_2
+        image_1 = image_1
+        image_2 = image_2
+
+        try:
+            db.session.add(new_character)
+            db.session.commit()
+            return make_response(new_character.to_dict(), 201)
+        
+        except Exception as e:
+            print(e)
+            return make_response({'error': 'Unprocessable Entity'}, 417)
+
+class UserByID(Resource):
+    def get(self, id):
+        user = User.query.filter_by(id=id).first()
+        if user:
+            return make_response(user.to_dict())
+        else:
+            return make_response({"error": "No User found"}, 404)
+    
+    def patch(self, id):
+        user = User.query.filter_by(id=id).first()
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        new_username = request.json.get('username')
+        new_password = request.json.get('_password_hash')
+        new_avatar = request.json.get('avatar')
+        current_module_id = request.json.get('current_module_id')
+
+        if current_module_id:
+            user.current_module_id = current_module_id
+
+        if new_username:
+            user.username = new_username
+
+        if new_avatar:
+            user.avatar = new_avatar
+
+        if new_password:
+            user.password_hash = new_password
+
         db.session.commit()
-    except:
+        return make_response(user.to_dict(), 200)
+    
+    def delete(self, id):
+        user = User.query.filter_by(id=id).first()
+        if not user:
+            return make_response({"error": "User not found"}, 404)
+        db.session.delete(user)
+        db.session.commit()
+        return make_response({}, 200)
+
+class Comments(Resource):
+    def get(self):
+
+        all_comments = []
+
+        for comment in Comment.query.all():
+            dict_comment = comment.to_dict()
+            all_comments.append(dict_comment)
+
         response = make_response(
-            jsonify({"error": "Username Already In Use"}),
-            400
+            jsonify(all_comments),
+            200
         )
+
         return response
-
-    session["user_token"] = new_user_object.id
-
-    print(session["user_token"])
-
-    response = make_response(
-        jsonify({"success": "New User Created Successfully"}),
-        201
-    )
-
-    return response
-
-
-@app.route("/all_characters")
-def all_characters():
-
-    all_chars = []
-
-    for character in Character.query.all():
-        dict_char = character.to_dict()
-        all_chars.append(dict_char)
-
-    response = make_response(
-        jsonify(all_chars),
-        200
-    )
-
-    return response
-
-@app.route("/all_users")
-def all_users():
-
-    all_users = []
-
-    for user in User.query.all():
-        dict_user = user.to_dict()
-        all_users.append(dict_user)
-
-    response = make_response(
-        jsonify(all_users),
-        200
-    )
-
-    return response
-
-@app.route("/all_comments")
-def all_comments():
-
-    all_comments = []
-
-    for comment in Comment.query.all():
-        dict_comment = comment.to_dict()
-        all_comments.append(dict_comment)
-
-    response = make_response(
-        jsonify(all_comments),
-        200
-    )
-
-    return response
 
 @app.route("/user/<int:id>")
 def user_by_id(id):
@@ -200,6 +225,25 @@ def comment_by_id(id):
         200
     )
     return response
+
+class CheckSession(Resource):
+
+    def get(self):
+        user_id = session.get('user_id')
+        
+        if not user_id:
+            return {'error': 'Unauthorized'}, 401
+        
+        current_user = User.query.filter(User.id == user_id).first()
+        return current_user.to_dict(), 200
+
+api.add_resource(Signup, '/signup')
+api.add_resource(Login, '/login')
+api.add_resource(Logout, '/logout')
+api.add_resource(Characters, '/characters')
+api.add_resource(Comments, '/comments')
+api.add_resource(UserByID, '/user/<int:id>')
+api.add_resource(CheckSession, '/check_session')
 
 
 

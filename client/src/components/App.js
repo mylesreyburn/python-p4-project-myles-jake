@@ -10,6 +10,9 @@ import Profile from './Profile';
 import Landing from './Landing';
 import Character from './Character'
 import Create from './Create'
+import SignUp from './SignUp'
+import { useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 const darkTheme = createTheme({
   palette: {
@@ -18,38 +21,47 @@ const darkTheme = createTheme({
 });
 
 function App() {
+  const history = useHistory();
   const [characters, setCharacters] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userInfo, setUserInfo] = useState({});
-  const [Allaccounts, setAccounts] = useState([])
+  const [user, setUser] = useState();
+  const { id } = useParams();
+  const [comments, setComments] = useState([]);
 
   useEffect(() => {
-    fetch('/all_characters')
+    fetch('/characters')
     .then((r) => r.json())
     .then(setCharacters)
   }, []);
+  useEffect(() => {
+    fetch("/comments")
+      .then((response) => response.json())
+      .then((data) => setComments(data.filter(comment => comment.character_id === id)));
+}, [id]);
+useEffect(() => {
+  fetch("/check_session")
+    .then((r) => {
+      if (r.ok) {
+        r.json().then((user) => setUser(user));
+        console.log(user)
+      }
+    });
+}, []);
 
-  async function logIn(enteredUser) {
-    const resp = await fetch('/all_users');
-    const accounts = await resp.json();
-    setAccounts(accounts);
-  
-    const user = Allaccounts.find((account) => account.username === enteredUser.email && account.password === enteredUser.password);
-    console.log(Allaccounts)
-    if (user) {
-      setIsLoggedIn(!isLoggedIn);
-      setUserInfo(user);
-    } else {
-      setIsLoggedIn(!isLoggedIn);
-      setUserInfo({});
-    }
-    console.log(isLoggedIn)
-  }
+const handleLogout = () => {
+  fetch("/logout", { method: "DELETE" })
+    .then((r) => {
+      if (r.ok) {
+        setUser(undefined)
+      }
+      history.push('/home')
+    })
+}
+
   return (
     <div style={{ width: '100%' }}>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
-        <Navbar isLoggedIn={isLoggedIn}/>
+        <Navbar user={user}/>
         <Switch>
           <Route path="/characters">
               <div
@@ -65,19 +77,22 @@ function App() {
               </div>
           </Route>
           <Route path="/character/:id">
-                  <Character></Character>
+                  <Character comments={comments}></Character>
           </Route>
           <Route exact path ="/login">
-            <SignIn logIn={logIn}></SignIn>
+            <SignIn setUser={setUser}></SignIn>
           </Route>
           <Route exact path = "/profile">
-            <Profile></Profile>
+            <Profile logout={handleLogout}></Profile>
           </Route>
           <Route exact path = "/home">
             <Landing></Landing>
           </Route>
           <Route exact path = "/create">
             <Create></Create>
+          </Route>
+          <Route exact path = "/signup">
+            <SignUp></SignUp>
           </Route>
         </Switch>
       </ThemeProvider>

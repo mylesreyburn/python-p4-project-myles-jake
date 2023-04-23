@@ -7,7 +7,7 @@ import { spacing } from '@mui/system';
 import { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
 
-function Character() {
+function Character({ comments }) {
     // Define state variables for character data, comments, and status
     const [{ data: character, error, status }, setCharacter] = useState({
         data: null,
@@ -15,14 +15,8 @@ function Character() {
         status: "pending",
     });
     const { id } = useParams();
-    const [comments, setComments] = useState([]);
 
     // Fetch comments data from server and filter based on character ID
-    useEffect(() => {
-        fetch("/all_comments")
-          .then((response) => response.json())
-          .then((data) => setComments(data.filter(comment => comment.character_id === id)));
-    }, [id]);
 
     // Fetch character data from server based on character ID
     useEffect(() => {
@@ -90,7 +84,7 @@ function Character() {
                 {/* Render all comments for this character */}
                 {comments.map((comment) => (
                     <Typography component="h1" varient="h6" key={comment.id}>
-                        {comment.contents}
+                        {comment.user.display_name}
                     </Typography>
                 ))}
             </Box>

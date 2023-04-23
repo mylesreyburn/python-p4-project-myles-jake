@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useHistory } from "react-router-dom";
+import Link from '@mui/material/Link';
 
 const darkTheme = createTheme({
     palette: {
@@ -16,17 +17,34 @@ const darkTheme = createTheme({
     },
   });
 
-export default function SignIn({ logIn }) {
+export default function SignIn({ setUser }) {
   const history = useHistory();
+  function handleSignup() {
+    history.push('/signup');
+  }
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const enteredUser = {
-      email: data.get('email'),
+      username: data.get('username'),
       password: data.get('password'),
     }
-    logIn(enteredUser)
-    history.push('/characters');
+    fetch('/login', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(enteredUser),
+  })
+  .then(res => {
+    if (res.ok){
+      res.json().then(setUser(enteredUser))
+      console.log("Logged in!")
+    }
+    else{
+      alert("Invalid User")
+    }
+  })
   };
 
   return (
@@ -56,7 +74,7 @@ export default function SignIn({ logIn }) {
               margin="normal"
               required
               fullWidth
-              id="email"
+              id="username"
               label="Username"
               name="username"
               autoComplete="username"
@@ -84,6 +102,7 @@ export default function SignIn({ logIn }) {
             >
               Sign In
             </Button>
+            <Link sx={{alignItems: 'center'}} href="#" onClick={handleSignup}>No Account? Click Here!</Link>
           </Box>
         </Box>
       </Container>

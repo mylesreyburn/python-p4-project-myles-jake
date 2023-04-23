@@ -3,8 +3,9 @@ import { deepOrange } from '@mui/material/colors';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { spacing } from '@mui/system';
+import Button from '@mui/material/Button';
 
-function Profile() {
+function Profile({ logout }) {
     return (
         <Box>
         <Box sx= {{
@@ -26,6 +27,7 @@ function Profile() {
         }}>
             Username
           </Typography>
+          <Button onClick={logout}>Logout</Button>
         </Box>
         <Box>
             <Typography component="h1" variant="h6" sx={{
