@@ -29,6 +29,10 @@ export default function ButtonAppBar({ user }) {
     history.push('/create');
   }
 
+  function handleProfile() {
+    history.push('/Profile');
+  }
+
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -57,7 +61,7 @@ export default function ButtonAppBar({ user }) {
                 Create
               </Button>
           </Box>
-          {user ? <Button color="inherit">logout</Button> : <Button color="inherit" onClick={handleLogin}>login</Button>}
+          {user ? <Button color="inherit" onClick={handleProfile}>Profile</Button> : <Button color="inherit" onClick={handleLogin}>login</Button>}
         </Toolbar>
       </AppBar>
     </Box>

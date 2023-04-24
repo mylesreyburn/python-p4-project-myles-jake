@@ -11,6 +11,7 @@ import Landing from './Landing';
 import Character from './Character'
 import Create from './Create'
 import SignUp from './SignUp'
+import EditProfile from './EditProfile';
 import { useParams } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 
@@ -35,8 +36,11 @@ function App() {
   useEffect(() => {
     fetch("/comments")
       .then((response) => response.json())
-      .then((data) => setComments(data.filter(comment => comment.character_id === id)));
-}, [id]);
+      .then((data) => setComments(data))
+},[]);
+
+console.log(comments)
+
 useEffect(() => {
   fetch("/check_session")
     .then((r) => {
@@ -83,7 +87,7 @@ const handleLogout = () => {
             <SignIn setUser={setUser}></SignIn>
           </Route>
           <Route exact path = "/profile">
-            <Profile logout={handleLogout}></Profile>
+            <Profile logout={handleLogout} user={user} setUser={setUser}></Profile>
           </Route>
           <Route exact path = "/home">
             <Landing></Landing>
@@ -93,6 +97,9 @@ const handleLogout = () => {
           </Route>
           <Route exact path = "/signup">
             <SignUp></SignUp>
+          </Route>
+          <Route exact path="/edit">
+            <EditProfile></EditProfile>
           </Route>
         </Switch>
       </ThemeProvider>

@@ -42,14 +42,15 @@ class Signup(Resource):
         data = request.get_json()
         username = data.get('username')
         password = data.get('password')
-        avatar = data.get('avatar')
+        profile_image = data.get('avatar')
 
         new_user = User(
-            username=username
+            username=username,
+            profile_image = profile_image
+            
         )
 
         new_user.password_hash = password
-        avatar = avatar
 
         try:
             db.session.add(new_user)
@@ -78,29 +79,26 @@ class Characters(Resource):
         return response
     
     def post(self):
-
-
         data = request.get_json()
         name = data.get('name')
         age = data.get('age')
         race = data.get('race')
         gender = data.get('gender')
-        bio_1 = data.get('bio1')
-        bio_2 = data.get('bio2')
-        image_1 = data.get('image1')
-        image_2 = data.get('image2')
+        bio_1 = data.get('bio_1')
+        bio_2 = data.get('bio_2')
+        image_1 = data.get('image_1')
+        image_2 = data.get('image_2')
 
         new_character = Character(
-            name=name
+            name=name,
+            age = age,
+            race = race,
+            gender = gender,
+            bio_1 = bio_1,
+            bio_2 = bio_2,
+            image_1 = image_1,
+            image_2 = image_2,
         )
-
-        age = age 
-        race = race
-        gender = gender
-        bio_1 = bio_1
-        bio_2 = bio_2
-        image_1 = image_1
-        image_2 = image_2
 
         try:
             db.session.add(new_character)
@@ -166,25 +164,24 @@ class Comments(Resource):
         )
 
         return response
+    
+    def post(self):
+        data = request.get_json()
+        contents = data.get('contents')
 
-@app.route("/user/<int:id>")
-def user_by_id(id):
-    user = User.query.filter(User.id == id).first()
-
-    if not user:
-        response = make_response(
-            jsonify({
-                "error": "404: User Not Found"
-            }),
-            404
+        new_comment = Comment(
+            contents=contents
         )
-        return response
 
-    response = make_response(
-        jsonify(user.to_dict()),
-        200
-    )
-    return response
+        try:
+            db.session.add(new_comment)
+            db.session.commit()
+            return make_response(new_comment.to_dict(), 201)
+        
+        except Exception as e:
+            print(e)
+            return make_response({'error': 'Unprocessable Entity'}, 417)
+
 
 @app.route("/character/<int:id>", methods=["GET", "POST", "PATCH"])
 def character_by_id(id):
@@ -199,8 +196,6 @@ def character_by_id(id):
         )
         return response
     
-    
-
     response = make_response(
         jsonify(character.to_dict()),
         200

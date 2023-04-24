@@ -7,6 +7,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useHistory } from "react-router-dom";
 
 const darkTheme = createTheme({
     palette: {
@@ -14,34 +15,37 @@ const darkTheme = createTheme({
     },
   });
 
-export default function SignUp({ setUser }) {
+export default function EditProfile({ user, setUser }) {
+  const history = useHistory();
   const handleSubmit = (event) => {
     const data = new FormData(event.currentTarget);
-    const new_user = {
+    const new_data = {
       username: data.get('username'),
       password: data.get('password'),
       profile_image: data.get('avatar')
     };
-    fetch('/signup', {
-        method: 'POST',
+    fetch(`/user/${user.id}`, {
+        method: 'PATCH',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify(new_user)
-    }).then(res => {
-        if (res.ok) {
-            res.json().then( new_user => setUser(new_user))
-            console.log('User successfully created!')
-        } else {
-            res.json().then( err => {
-                console.log(err)
-                alert('Username is already taken!')
-            })
-        }
-    }).catch(err => {
-        console.error('Error during fetch:', err);
-    });
-  };
+            body: JSON.stringify({new_data}),
+        })
+    .then((res) => {
+            if (res.ok) {
+              return res.json();
+            }
+            throw new Error('Network response was not ok');
+          })
+          .then((new_data) => {
+            setUser(new_data);
+            setUser(undefined)
+            history.push('/home');
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      };
 
   return (
     <ThemeProvider theme={darkTheme}>

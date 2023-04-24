@@ -6,6 +6,9 @@ import Typography from '@mui/material/Typography';
 import { spacing } from '@mui/system';
 import { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
 
 function Character({ comments }) {
     // Define state variables for character data, comments, and status
@@ -14,7 +17,25 @@ function Character({ comments }) {
         error: null,
         status: "pending",
     });
+    
     const { id } = useParams();
+    const filteredComments = comments.filter(comment => comment.character_id === character.id)
+
+    const handleSubmit = (event) => {
+        const data = new FormData(event.currentTarget);
+        const newComment = {
+            user_id: id,
+            character_id: character.id,
+            contents: data.contents
+        }
+        fetch("/comments", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newComment),
+          });
+    }
 
     // Fetch comments data from server and filter based on character ID
 
@@ -82,11 +103,36 @@ function Character({ comments }) {
                     </Typography>
                 )}
                 {/* Render all comments for this character */}
-                {comments.map((comment) => (
-                    <Typography component="h1" varient="h6" key={comment.id}>
+                {filteredComments.map((comment) => (
+                    <Typography component="h1" varient="h6" key={comment.id} sx={{ml:125, mt:5}}>
                         {comment.user.display_name}
+                        <br></br>
+                        {comment.contents}
                     </Typography>
                 ))}
+                <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 20 }}>
+                    <Grid container spacing={2}>
+                        <Grid item xs={2} sx={{ml:125}}>
+                            <TextField
+                            required
+                            fullWidth
+                            name="Comment"
+                            label="Enter Comment"
+                            type="contents"
+                            id="contents"
+                            />
+                        </Grid>
+                    </Grid>
+                    <Button
+                    type="submit"
+                    variant="contained"
+                    sx={{ ml: 125, mt: 1 }}
+                    >
+                    Post Comment
+                    </Button>
+                    <Grid container justifyContent="flex-end">
+                    </Grid>
+                    </Box>
             </Box>
         </Box>
     )
