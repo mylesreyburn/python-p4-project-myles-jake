@@ -42,7 +42,7 @@ class Signup(Resource):
         data = request.get_json()
         username = data.get('username')
         password = data.get('password')
-        profile_image = data.get('avatar')
+        profile_image = data.get('profile_image')
 
         new_user = User(
             username=username,
@@ -88,6 +88,7 @@ class Characters(Resource):
         bio_2 = data.get('bio_2')
         image_1 = data.get('image_1')
         image_2 = data.get('image_2')
+        user_id = data.get('user_id')
 
         new_character = Character(
             name=name,
@@ -98,6 +99,7 @@ class Characters(Resource):
             bio_2 = bio_2,
             image_1 = image_1,
             image_2 = image_2,
+            user_id  = user_id
         )
 
         try:
@@ -121,22 +123,19 @@ class UserByID(Resource):
         user = User.query.filter_by(id=id).first()
         if not user:
             return make_response({"error": "User not found"}, 404)
-        new_username = request.json.get('username')
-        new_password = request.json.get('_password_hash')
-        new_avatar = request.json.get('avatar')
+        new_username = request.json.get('display_name')
+        new_avatar = request.json.get('profile_image')
+        print(f"display name: {new_username}, profile_image:{new_avatar}")
         current_module_id = request.json.get('current_module_id')
 
-        if current_module_id:
-            user.current_module_id = current_module_id
+        # if current_module_id:
+        #     user.current_module_id = current_module_id
 
         if new_username:
-            user.username = new_username
+            user.display_name = new_username
 
         if new_avatar:
-            user.avatar = new_avatar
-
-        if new_password:
-            user.password_hash = new_password
+            user.profile_image = new_avatar
 
         db.session.commit()
         return make_response(user.to_dict(), 200)
