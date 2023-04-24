@@ -137,6 +137,7 @@ class UserByID(Resource):
         if new_avatar:
             user.profile_image = new_avatar
 
+        db.session.add(user)
         db.session.commit()
         return make_response(user.to_dict(), 200)
     
@@ -167,9 +168,13 @@ class Comments(Resource):
     def post(self):
         data = request.get_json()
         contents = data.get('contents')
+        user_id = data.get('user_id')
+        character_id = data.get('character_id')
 
         new_comment = Comment(
-            contents=contents
+            contents=contents,
+            user_id=user_id,
+            character_id=character_id
         )
 
         try:
